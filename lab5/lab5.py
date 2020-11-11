@@ -1,11 +1,11 @@
 class Warehouse:
     """
-    Абстрактный склад, на котором хранятся процессоры и видеокарты
+    Абстрактный склад, на котором хранятся процессоры и память
     """
     def get_processor(self):
         pass
 
-    def get_graphcard(self):
+    def get_flash(self):
         pass
 
 
@@ -21,27 +21,27 @@ class Processor():
         return f'{self.name} ({self.frequency})'
 
 
-class Intel(Processor):
+class OriginalATMega(Processor):
     """
-    Конкретный процессор Intel
-    """
-    def __init__(self):
-        self.name = 'INTEL'
-        self.frequency = '2.7 Ghz'
-
-
-class AMD(Processor):
-    """
-    Конкретный процессор AMD
+    Оригинальный процессор
     """
     def __init__(self):
-        self.name = 'AMD'
-        self.frequency = '3.2 Ghz'
+        self.name = 'Original 328p'
+        self.frequency = '8 Mhz'
 
 
-class GraphCard():
+class CloneATMega(Processor):
     """
-    Абстрактная видеокарта
+    Копия оригинального процессора
+    """
+    def __init__(self):
+        self.name = 'Clone 328p'
+        self.frequency = '8 Mhz'
+
+
+class Flash():
+    """
+    Абстрактная флеш память
     """
     def __init__(self):
         self.name = ''
@@ -50,128 +50,125 @@ class GraphCard():
         return self.name
 
 
-class Nvidia(GraphCard):
+class OriginalFlash(Flash):
     """
-    Конкретная видеокарта Nvidia
-    """
-    def __init__(self):
-        self.name = 'NVIDIA'
-
-
-class Radeon(GraphCard):
-    """
-    Конкретная видеокарта Radeon
+    Оригинальная флеш память
     """
     def __init__(self):
-        self.name = 'RADEON'
+        self.name = 'Original flash'
 
 
-class IntelWarehouse(Warehouse):
+class CloneFlash(Flash):
     """
-    Склад Intel, с процессорами Intel и видеокартами Nvidia
+    Копия оригинальной флеш памяти
     """
-    def get_processor(self):
-        return Intel()
-
-    def get_graphcard(self):
-        return Nvidia()
+    def __init__(self):
+        self.name = 'Clone flash'
 
 
-class AMDWarehouse(Warehouse):
+class OriginalWarehouse(Warehouse):
     """
-    Склад AMD, с процессорами AMD и видеокартами Radeon
+    Склад с оригинальными компонентами
     """
     def get_processor(self):
-        return AMD()
+        return OriginalATMega()
 
-    def get_graphcard(self):
-        return Radeon()
+    def get_flash(self):
+        return OriginalFlash()
 
 
-class Computer:
+class CloneWarehouse(Warehouse):
     """
-    Абстрактный компьютер
+    Склад с копиями оригинальных компонентов
+    """
+    def get_processor(self):
+        return CloneATMega()
+
+    def get_flash(self):
+        return CloneFlash()
+
+
+class Controller:
+    """
+    Абстрактный контроллер
     """
     def __init__(self):
         self.processor = ''
-        self.ram = ''
-        self.storage = ''
-        self.graphcard = ''
+        self.flash = ''
+        self.boardsize = ''
+        self.plugtype = ''
 
     def __str__(self):
         return (
-            'Builded computer:\n' +
+            'Builded controller:\n' +
             f'\tProcessor: {self.processor}\n' +
-            f'\tRam: {self.ram}\n' +
-            f'\tStorage: {self.storage}\n' +
-            f'\tGraph card: {self.graphcard}'
+            f'\tFlash: {self.flash}\n' +
+            f'\tBoardsize: {self.boardsize}\n' +
+            f'\tPlugtype: {self.plugtype}'
         )
 
 
 class Builder:
     """
-    Работник магазина, собирающий компьютер
+    Работник производства
     """
     def build(self, warehouse):
-        self.computer = Computer()
+        self.controller = Controller()
         self.warehouse = warehouse
 
 
-class OfficeComputer(Builder):
+class DevelopmentBoard(Builder):
     """
-    Офисный компьютер, собираемый работником магазина
-    """
-    def set_processor(self):
-        self.computer.processor = self.warehouse.get_processor()
-
-    def set_ram(self):
-        self.computer.ram = '4 GB'
-
-    def set_storage(self):
-        self.computer.storage = 'HDD 250 GB'
-
-    def set_graphcard(self):
-        self.computer.graphcard = 'NO'
-
-
-class GamingComputer(Builder):
-    """
-    Игровой компьютер, собираемый работником магазина
+    Плата для разработки
     """
     def set_processor(self):
-        self.computer.processor = self.warehouse.get_processor()
+        self.controller.processor = self.warehouse.get_processor()
 
-    def set_ram(self):
-        self.computer.ram = '16 GB'
+    def set_flash(self):
+        self.controller.flash = self.warehouse.get_flash()
 
-    def set_storage(self):
-        self.computer.storage = 'SSD 1000 GB'
+    def set_boardsize(self):
+        self.controller.boardsize = 'Big'
 
-    def set_graphcard(self):
-        self.computer.graphcard = self.warehouse.get_graphcard()
+    def set_plugtype(self):
+        self.controller.plugtype = 'Micro USB'
 
 
-class Shop:
+class ProjectBoard(Builder):
     """
-    Компьютерный магазин
+    Плата для готового проекта
     """
-    def set_computer(self, builder):
+    def set_processor(self):
+        self.controller.processor = self.warehouse.get_processor()
+
+    def set_flash(self):
+        self.controller.flash = self.warehouse.get_flash()
+
+    def set_boardsize(self):
+        self.controller.boardsize = 'Small'
+
+    def set_plugtype(self):
+        self.controller.plugtype = 'Without connector'
+
+
+class Factory:
+    """
+    Фабрика, собирает контроллеры на заказ
+    """
+    def set_controller_type(self, builder):
         self.builder = builder
 
-    def build_computer(self, warehouse):
+    def build_controller(self, warehouse):
         self.builder.build(warehouse)
         self.builder.set_processor()
-        self.builder.set_ram()
-        self.builder.set_storage()
-        self.builder.set_graphcard()
-
-    def get_computer(self):
-        return self.builder.computer
+        self.builder.set_flash()
+        self.builder.set_boardsize()
+        self.builder.set_plugtype()
+        return self.builder.controller
 
 
 if __name__ == '__main__':
-    shop = Shop()
-    shop.set_computer(GamingComputer())
-    shop.build_computer(AMDWarehouse())
-    computer = shop.get_computer()
-    print(computer)
+    factory = Factory()
+    factory.set_controller_type(DevelopmentBoard())
+    c = factory.build_controller(CloneWarehouse())
+    print(c)
